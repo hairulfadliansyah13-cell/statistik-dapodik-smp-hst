@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Dashboard Statistik Indikator Kualitas Dapodik Tingkat SMP Kabupaten Hulu Sungai Tengah">
+  <title>Statistik Kualitas Dapodik SMP HST</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--ink:#142033;--muted:#6b778c;--primary:#155eef;--primary2:#0b4dcc;--line:#e6ebf2;--success:#0f9d58;--danger:#d92d20;--shadow:0 16px 45px rgba(20,32,51,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .hero{background:linear-gradient(135deg,#0b2e63,#155eef 58%,#4f8cff);color:#fff;padding:28px 20px 80px}
+    .wrap{max-width:1200px;margin:auto}.brand{display:flex;gap:14px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-weight:800;font-size:19px;border:1px solid rgba(255,255,255,.25)}
+    h1{font-size:clamp(24px,4vw,38px);margin:22px 0 8px}.subtitle{opacity:.86;max-width:760px;line-height:1.6}
+    .nav{display:flex;gap:8px;margin-top:22px}.nav button{border:0;border-radius:12px;padding:11px 16px;background:rgba(255,255,255,.13);color:#fff;cursor:pointer;font-weight:700}.nav button.active{background:#fff;color:#0b2e63}
+    main{margin-top:-52px;padding:0 20px 40px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.field label{display:block;font-weight:700;margin-bottom:7px}.field small{display:block;color:var(--muted);margin-top:5px}
+    input,select{width:100%;padding:13px 14px;border:1px solid #d8e0eb;border-radius:12px;background:#fff;font:inherit;outline:none}input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(21,94,239,.1)}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.metric{padding:18px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe}.metric b{display:block;margin-bottom:10px}.metric input{font-size:20px;font-weight:800}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}.primary{background:var(--primary);color:#fff}.secondary{background:#edf3ff;color:#174ea6}
+    .msg{margin-top:14px;padding:12px 14px;border-radius:12px;display:none}.msg.ok{display:block;background:#eaf8f0;color:#087443}.msg.err{display:block;background:#fff0ef;color:#b42318}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi{padding:18px;border:1px solid var(--line);border-radius:16px}.kpi .v{font-size:28px;font-weight:900;margin-top:6px}.muted{color:var(--muted)}
+    .toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.toolbar .field{min-width:220px;flex:1}.toolbar .smallbtn{flex:0 0 auto}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:800px}.table th,.table td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left}.table th{background:#f8fafc;font-size:13px;color:#536176;position:sticky;top:0}.num{text-align:right!important;font-variant-numeric:tabular-nums}
+    .badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#edf3ff;color:#174ea6;font-weight:800;font-size:12px}.empty{text-align:center;padding:35px;color:var(--muted)}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.section-title h2{margin:0;font-size:20px}.page{display:none}.page.active{display:block}
+    canvas{max-height:360px}.footer{text-align:center;color:var(--muted);font-size:13px;padding:20px}
+    @media(max-width:800px){.grid,.metrics,.kpis{grid-template-columns:1fr}.hero{padding-bottom:70px}.card{padding:18px}.actions{justify-content:stretch}.actions .btn{flex:1}}
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><div class="logo">DH</div><div><b>Dashboard Dapodik</b><div style="opacity:.72;font-size:13px">SMP Kabupaten Hulu Sungai Tengah</div></div></div>
+    <h1>Statistik Indikator Kualitas Dapodik</h1>
+    <div class="subtitle">Pantau kelengkapan, validitas, dan kebaruan pembaruan data Dapodik setiap bulan untuk seluruh SMP Kabupaten Hulu Sungai Tengah.</div>
+    <div class="nav">
+      <button id="nav1" class="active" onclick="showPage(1)">01 · Input Data</button>
+      <button id="nav2" onclick="showPage(2)">02 · Rekap Statistik</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="page1" class="page active">
+    <div class="card">
+      <div class="section-title"><h2>Input Indikator Kualitas Dapodik</h2><span class="badge">Per sekolah / per bulan</span></div>
+      <div class="grid">
+        <div class="field"><label>Bulan Sinkronisasi</label><input id="month" type="month"><small>Pilih bulan terakhir data Dapodik disinkronkan/diperbarui.</small></div>
+        <div class="field"><label>Nama Sekolah</label><select id="school"><option value="">Memuat sekolah...</option></select></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><b>Persentase Kelengkapan Data</b><input id="completeness" type="number" min="0" max="100" step="0.01" placeholder="0–100"><small class="muted">Contoh: 98.50%</small></div>
+        <div class="metric"><b>Tingkat Validitas Data terhadap Referensi</b><input id="validity" type="number" min="0" max="100" step="0.01" placeholder="0–100"><small class="muted">Contoh: 97.00%</small></div>
+        <div class="metric"><b>Kebaruan Pembaruan Data per Bulan</b><input id="freshness" type="number" min="0" max="100" step="0.01" placeholder="0–100"><small class="muted">Contoh: 100%</small></div>
+      </div>
+      <div class="actions"><button class="btn secondary" onclick="resetForm()">Reset</button><button class="btn primary" onclick="save()">Simpan Data</button></div>
+      <div id="msg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Data Terakhir</h2><button class="btn secondary" onclick="loadRecent()">Muat Ulang</button></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Bulan</th><th>Sekolah</th><th class="num">Kelengkapan</th><th class="num">Validitas</th><th class="num">Kebaruan</th><th class="num">Rata-rata</th></tr></thead><tbody id="recentBody"><tr><td colspan="6" class="empty">Memuat data...</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="page2" class="page">
+    <div class="card">
+      <div class="section-title"><h2>Rekap Statistik Bulanan</h2><span class="badge">Halaman 2</span></div>
+      <div class="toolbar">
+        <div class="field"><label>Bulan</label><select id="filterMonth"><option value="">Semua bulan</option></select></div>
+        <div class="field"><label>Sekolah</label><select id="filterSchool"><option value="">Semua sekolah</option></select></div>
+        <button class="btn primary smallbtn" onclick="loadSummary()">Tampilkan</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="muted">Kelengkapan rata-rata</div><div id="kpi1" class="v">0%</div></div>
+      <div class="kpi"><div class="muted">Validitas rata-rata</div><div id="kpi2" class="v">0%</div></div>
+      <div class="kpi"><div class="muted">Kebaruan rata-rata</div><div id="kpi3" class="v">0%</div></div>
+      <div class="kpi"><div class="muted">Indeks kualitas</div><div id="kpi4" class="v">0%</div></div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="section-title"><h2>Grafik Indikator</h2><span class="muted" id="chartLabel">Semua sekolah</span></div>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>Rekap per Sekolah</h2><span class="muted" id="rowCount"></span></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>No</th><th>Sekolah</th><th>Bulan</th><th class="num">Kelengkapan</th><th class="num">Validitas</th><th class="num">Kebaruan</th><th class="num">Indeks</th></tr></thead><tbody id="summaryBody"><tr><td colspan="7" class="empty">Memuat data...</td></tr></tbody></table></div>
+    </div>
+  </section>
+</main>
+<div class="footer">Dashboard Indikator Kualitas Dapodik · SMP Kabupaten Hulu Sungai Tengah</div>
+
+<script>
+let chart = null;
+
+function showPage(n){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+  document.getElementById('nav'+n).classList.add('active');
+  if(n===2) loadSummary();
+}
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function pct(v){return Number(v||0).toFixed(2)+'%';}
+function monthLabel(m){if(!m)return '-'; const [y,mo]=m.split('-'); const names=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return names[Number(mo)-1]+' '+y;}
+
+function init(){
+  google.script.run.withSuccessHandler(schools=>{
+    fillSchools(schools);
+    loadRecent();
+    loadMonths();
+  }).getSchools();
+}
+function fillSchools(schools){
+  const ids=['school','filterSchool'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    el.innerHTML=(id==='filterSchool'?'<option value="">Semua sekolah</option>':'<option value="">Pilih sekolah...</option>')+
+      schools.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  });
+}
+function showMsg(text,ok=true){const m=document.getElementById('msg');m.textContent=text;m.className='msg '+(ok?'ok':'err');setTimeout(()=>m.className='msg',4500);}
+function save(){
+  const payload={month:month.value,school:school.value,completeness:completeness.value,validity:validity.value,freshness:freshness.value};
+  if(!payload.month||!payload.school||[payload.completeness,payload.validity,payload.freshness].some(v=>v===''||Number(v)<0||Number(v)>100)){showMsg('Lengkapi semua isian. Nilai indikator harus 0–100.',false);return;}
+  google.script.run.withSuccessHandler(r=>{showMsg(r.message,true);loadRecent();loadMonths();}).withFailureHandler(e=>showMsg(e.message||'Gagal menyimpan data.',false)).saveData(payload);
+}
+function resetForm(){['month','school','completeness','validity','freshness'].forEach(id=>document.getElementById(id).value='');}
+function loadRecent(){
+  google.script.run.withSuccessHandler(data=>{
+    data=data.sort((a,b)=>(b.month+a.school).localeCompare(a.month+b.school)).slice(0,10);
+    recentBody.innerHTML=data.length?data.map(r=>`<tr><td>${monthLabel(r.month)}</td><td>${esc(r.school)}</td><td class="num">${pct(r.completeness)}</td><td class="num">${pct(r.validity)}</td><td class="num">${pct(r.freshness)}</td><td class="num"><b>${pct(r.average)}</b></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
+  }).getData({});
+}
+function loadMonths(){
+  google.script.run.withSuccessHandler(data=>{
+    const months=[...new Set(data.map(x=>x.month))].sort().reverse();
+    filterMonth.innerHTML='<option value="">Semua bulan</option>'+months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
+  }).getData({});
+}
+function loadSummary(){
+  const m=filterMonth.value, s=filterSchool.value;
+  if(s){
+    google.script.run.withSuccessHandler(renderSchoolSummary).getData({month:m,school:s});
+  }else{
+    google.script.run.withSuccessHandler(renderSummary).getSummary(m);
+  }
+}
+function renderSchoolSummary(data){
+  const rows=data.sort((a,b)=>a.month.localeCompare(b.month));
+  const overall=rows.length?{
+    completeness:avg(rows.map(x=>x.completeness)),validity:avg(rows.map(x=>x.validity)),freshness:avg(rows.map(x=>x.freshness)),average:avg(rows.map(x=>(x.completeness+x.validity+x.freshness)/3))
+  }:{completeness:0,validity:0,freshness:0,average:0};
+  setKpi(overall); chartLabel.textContent=filterSchool.value+' · tren bulanan';
+  summaryBody.innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.school)}</td><td>${monthLabel(r.month)}</td><td class="num">${pct(r.completeness)}</td><td class="num">${pct(r.validity)}</td><td class="num">${pct(r.freshness)}</td><td class="num"><b>${pct((r.completeness+r.validity+r.freshness)/3)}</b></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Tidak ada data.</td></tr>';
+  rowCount.textContent=rows.length+' periode';
+  draw(rows.map(r=>monthLabel(r.month)),rows.map(r=>r.completeness),rows.map(r=>r.validity),rows.map(r=>r.freshness));
+}
+function renderSummary(result){
+  const rows=result.rows||[]; setKpi(result.overall||{});
+  chartLabel.textContent=filterMonth.value?monthLabel(filterMonth.value):'Semua bulan';
+  summaryBody.innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.school)}</td><td>${monthLabel(r.month)}</td><td class="num">${pct(r.completeness)}</td><td class="num">${pct(r.validity)}</td><td class="num">${pct(r.freshness)}</td><td class="num"><b>${pct(r.average)}</b></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Belum ada data pada filter yang dipilih.</td></tr>';
+  rowCount.textContent=rows.length+' sekolah';
+  draw(rows.map(r=>r.school),rows.map(r=>r.completeness),rows.map(r=>r.validity),rows.map(r=>r.freshness));
+}
+function avg(a){return a.length?a.reduce((x,y)=>x+Number(y||0),0)/a.length:0;}
+function setKpi(o){kpi1.textContent=pct(o.completeness);kpi2.textContent=pct(o.validity);kpi3.textContent=pct(o.freshness);kpi4.textContent=pct(o.average);}
+function draw(labels,a,b,c){
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById('chart'),{type:'bar',data:{labels,datasets:[
+    {label:'Kelengkapan',data:a},
+    {label:'Validitas',data:b},
+    {label:'Kebaruan',data:c}
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(2)+'%'}}}}});
+}
+init();
+</script>
+</body>
+</html>
